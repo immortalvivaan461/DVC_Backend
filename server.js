@@ -10,17 +10,21 @@ const app = express();
 
 // ✅ Allow both local and deployed frontend URLs
 const allowedOrigins = [
-    "http://localhost:5173",   // Local dev
-    "https://dvc2-1.onrender.com" // Production
+    "http://localhost:5173",  // Local dev
+    "https://your-frontend.vercel.app" // Replace with your deployed frontend URL
 ];
+app.use(cors({
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS not allowed"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"], // ✅ Allow all needed headers
+}));
 
-app.use(
-    cors({
-        origin: ["http://localhost:5173", "https://dvc2-1.onrender.com"],
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin"],
-    })
-);
 
 app.use(express.json());
 
