@@ -7,7 +7,14 @@ exports.NewMsg = async (req, res) => {
 
         const msg = await ContactMsgModel.create(req.body);
 
-        // ✉️ Setup transporter
+        // Respond immediately to avoid timeout
+        res.status(200).json({
+            success: true,
+            msg: "Message received successfully. Email will be sent shortly.",
+            data: msg,
+        });
+
+        // ✉️ Send email asynchronously
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -16,30 +23,25 @@ exports.NewMsg = async (req, res) => {
             },
         });
 
-        // 📦 Email details
         const mailOptions = {
             from: `"Deep Vegetables Company" <${process.env.EMAIL_USER}>`,
-            to: "iamvivaan461@gmail.com", // your company email
+            to: process.env.EMAIL_USER,
             subject: "New Contact Message from DVC Website",
             html: `
-        <h2>New Message from Contact Form</h2>
-        <p><b>Name:</b> ${req.body.name}</p>
-        <p><b>Email:</b> ${req.body.email}</p>
-        <p><b>Contact:</b> ${req.body.contact}</p>
-        <p><b>Message:</b><br/>${req.body.message}</p>
-      `,
+                <h2>New Message from Contact Form</h2>
+                <p><b>Name:</b> ${req.body.name}</p>
+                <p><b>Email:</b> ${req.body.email}</p>
+                <p><b>Contact:</b> ${req.body.contact}</p>
+                <p><b>Message:</b><br/>${req.body.message}</p>
+            `,
         };
 
-        // 🚀 Send email
-        await transporter.sendMail(mailOptions);
+        transporter.sendMail(mailOptions)
+            .then(() => console.log("✅ Email sent successfully"))
+            .catch(err => console.error("❌ Email sending error:", err));
 
-        res.status(200).json({
-            success: true,
-            msg: "Message sent successfully and email delivered.",
-            data: msg,
-        });
     } catch (error) {
-        console.error("❌ Error saving or sending email:", error);
+        console.error("❌ Error saving message:", error);
         res.status(500).json({
             success: false,
             msg: error.message || "Unknown error",
