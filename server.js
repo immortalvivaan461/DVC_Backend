@@ -11,7 +11,7 @@ const app = express();
 // ✅ Allow both local and deployed frontend URLs
 const allowedOrigins = [
     "http://localhost:5173",  // Local dev
-    "https://deepvegetablesco.vercel.app" // Replace with your deployed frontend URL
+    "https://deepvegetablesco.vercel.app"
 ];
 app.use(cors({
     origin: function(origin, callback) {
